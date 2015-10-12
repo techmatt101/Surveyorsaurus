@@ -5,7 +5,8 @@ var deepExtend = require('deep-extend');
 var chalk = require('chalk');
 var argh = require('argh');
 
-var testRunner = require('./lib/testRunner');
+var TestRunner = require('./lib/testRunner');
+var reporter = require('./lib/reporter');
 
 if (argh.argv.init) {
     console.log("Not supported yet :(");
@@ -39,6 +40,8 @@ function printVersion() {
 }
 
 loadConfig(((argh.argv.argv) ? argh.argv.argv[0] : 'surveyorsaurus.json'), function(configData) {
+    var testRunner = new TestRunner();
+    reporter(testRunner);
     if (argh.argv.approve) {
         testRunner.runTests(configData.tests, function(tests) {
             if (argh.argv.skip) {
