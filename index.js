@@ -7,88 +7,76 @@ var argh = require('argh');
 
 var TestRunner = require('./lib/testRunner');
 var reporter = require('./lib/reporter');
+var print = require('./lib/print');
 
-if (argh.argv.init) {
-    console.log("Not supported yet :(");
-    process.exit(0);
+switch(argh.argv.argv[0]) {
+    case 'version':
+        print.version();
+        process.exit(0);
+        break;
+
+    case 'help':
+        print.help();
+        process.exit(0);
+        break;
+
+    case 'test':
+        runTests();
+        break;
+
+    default:
+        console.log("Unknown option '" + argh.argv.argv + "'");
+        print.options();
+        process.exit(0);
 }
 
-if (argh.argv.version) {
-    printVersion();
-    process.exit(0);
-}
-
-if (argh.argv.help) {
-    printHelp();
-    process.exit(0);
-}
-
-function printHelp() {
-    printVersion();
-    console.log("Options:");
-    console.log(" --init        Create base config file for project");
-    console.log(" --test        Run Tests");
-    console.log(" --approve     Approve failed tests to past");
-    console.log(" --skip        Skip annoying confirmation messages");
-    console.log(" --version     Print version");
-    console.log(" --help        Print help guide");
-}
-
-function printVersion() {
-    var pjson = require('./package.json');
-    console.log(pjson.name + ' v' + pjson.version);
-}
-
-loadConfig(((argh.argv.argv) ? argh.argv.argv[0] : 'surveyorsaurus.json'), function(configData) {
-    var testRunner = new TestRunner();
-    reporter(testRunner);
-    if (argh.argv.approve) {
-        testRunner.runTests(configData.tests, function(tests) {
-            if (argh.argv.skip) {
-                console.log("Oh...");
-            }
-            var failed = '';
-            var failedTests = [];
-            var failedLength = 0;
-            for (var i = 0; i < tests.length; i++) {
-                if (!tests[i].passed) {
-                    failedTests.push(tests[i]);
-                    failedLength++;
-                    failed += chalk.inverse(tests[i].name) + ' ';
+function runTests() {
+    loadConfig(argh.argv.config || 'surveyorsaurus.json', function(configData) {
+        var testRunner = new TestRunner();
+        reporter(testRunner);
+        if (argh.argv.approve) {
+            testRunner.runTests(configData.tests, function(tests) {
+                var failed = '';
+                var failedTests = [];
+                var failedLength = 0;
+                for (var i = 0; i < tests.length; i++) {
+                    if (!tests[i].passed) {
+                        failedTests.push(tests[i]);
+                        failedLength++;
+                        failed += chalk.inverse(tests[i].name) + ' ';
+                    }
                 }
-            }
-            if (failedLength === 0) {
-                exit(tests);
-            }
-            prompt.confirm(chalk.cyan("Sure you want to approve the following " + failedLength + " tests? (y/n): \n") + failed + "\n")(function(err, yes) {
-                if (err) throw err;
-                if (yes) {
-                    approve(failedTests, function(/*err*/) {
-                        //if(err) throw err;
-                        console.log(failedLength + " have been successfully approved!");
+                if (failedLength === 0) {
+                    exit(tests);
+                }
+                prompt.confirm(chalk.cyan("Sure you want to approve the following " + failedLength + " tests? (y/n): \n") + failed + "\n")(function(err, yes) {
+                    if (err) throw err;
+                    if (yes) {
+                        approve(failedTests, function(/*err*/) {
+                            //if(err) throw err;
+                            console.log(failedLength + " have been successfully approved!");
+                            process.exit(0);
+
+                        });
+                    } else {
+                        console.log("Approval cancelled");
                         process.exit(0);
-
-                    });
-                } else {
-                    console.log("Approval cancelled");
-                    process.exit(0);
-                }
+                    }
+                });
             });
-        });
-    } else if (argh.argv.test) {
-        if (typeof argh.argv.test === 'string') {
-            var lookup = configData.keys[stringToId(argh.argv.test)];
-            if (typeof lookup === 'undefined') {
-                throw new Error("Can't find '" + argh.argv.test + "' test");
-            }
-            testRunner.runTests(configData.tests[lookup], exit);
         } else {
-            testRunner.runTests(configData.tests, exit);
+            if (typeof argh.argv.test === 'string') {
+                var lookup = configData.keys[stringToId(argh.argv.test)];
+                if (typeof lookup === 'undefined') {
+                    throw new Error("Can't find '" + argh.argv.test + "' test");
+                }
+                testRunner.runTests(configData.tests[lookup], exit);
+            } else {
+                testRunner.runTests(configData.tests, exit);
+            }
         }
-    } else {
-        printHelp();
-    }
-});
+    });
+}
 
 function approve(tests, callback) {
     if (!(tests instanceof Array)) tests = [tests];
