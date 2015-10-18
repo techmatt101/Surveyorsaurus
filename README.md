@@ -27,6 +27,7 @@ Simple CSS Regression Testing inspired by [csscritic](https://github.com/cburgme
     
 ## Config
 ```json
+surveyorsaurus.json
 {
   "scenarios": {
     "example": {
