@@ -1,16 +1,15 @@
 {
   "viewports": [],
-  "scenarios": [
-    {
-      "name": "BBC Home Page",
-      "url": "http://www.bbc.co.uk/",
-      "tests": [
-        {
-          "name": "Navbar",
-          "description": "BBC home page header navigation Bar styling screenshot",
-          "element": "#orb-header"
+  "scenarios": {
+    "example": {
+      "description": "Example page",
+      "url": "http://example.com/",
+      "tests": {
+        "content": {
+          "description": "example content",
+          "element": "div"
         }
-      ]
+      }
     }
-  ]
+  }
 }
