@@ -1,9 +1,2 @@
-bower_components
 node_modules
 npm-debug.log
-
-# Build
-build/
-bin/
-dist/
-tmp/

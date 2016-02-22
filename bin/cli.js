@@ -1,15 +1,17 @@
+#!/usr/bin/env node
+
 var fs = require('fs');
 var async = require('async');
 var confirm = require('confirm-simple');
 var argh = require('argh');
 
-var TestRunner = require('./testRunner');
-var ImageComparison = require('./imageComparison');
-var ScreenshotRunner = require('./screenshotRunner');
-var TestHistory = require('./testHistory');
-var TestResults = require('./testResults');
-var reporter = require('./reporter');
-var config = require('./config');
+var TestRunner = require('../lib/testRunner');
+var ImageComparison = require('../lib/imageComparison');
+var ScreenshotRunner = require('../lib/screenshotRunner');
+var TestHistory = require('../lib/testHistory');
+var TestResults = require('../lib/testResults');
+var reporter = require('../lib/reporter');
+var config = require('../lib/config');
 
 switch (argh.argv.argv ? argh.argv.argv[0] : null) {
     case 'version':
