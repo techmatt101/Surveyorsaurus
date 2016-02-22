@@ -1,18 +1,13 @@
 #!/usr/bin/env node
-
 var fs = require('fs');
 var async = require('async');
 var confirm = require('confirm-simple');
 var argh = require('argh');
 
-var TestRunner = require('../lib/testRunner');
-var ImageComparison = require('../lib/imageComparison');
-var ScreenshotRunner = require('../lib/screenshotRunner');
-var TestHistory = require('../lib/testHistory');
-var TestResults = require('../lib/testResults');
-var reporter = require('../lib/reporter');
-var config = require('../lib/config');
-var TestCaseMapper = require("../lib/mapper");
+var config = require('../lib/Config');
+var Reporter = require('./reporter');
+var Surveyorsaurus = require("../lib/Surveyorsaurus");
+
 
 switch (argh.argv.argv ? argh.argv.argv[0] : null) {
     case 'version':
@@ -58,37 +53,30 @@ function printVersion() {
     console.log(pjson.name + ' v' + pjson.version);
 }
 
-function runTests() {
-    fs.readFile(argh.argv.config || 'surveyorsaurus.json', 'utf8', function(err, configFile) {
-        if (err) throwFileError(err);
-        var configJson;
-        try {
-            configJson = JSON.parse(configFile);
-        } catch (err) {
-            throwFileError(err);
-        }
 
-        config.validate(configJson, function(err, configData) {
+function runTests() {
+    fs.readFile(argh.argv.config || 'surveyorsaurus.json', 'utf8', (err, configFile) => {
+        if (err) throwFileError(err);
+        var surveyorsaurus = new Surveyorsaurus();
+
+        surveyorsaurus.load(configFile, (err) => {
             if(err) throw err;
-            var scenarios = TestCaseMapper.mapScenarios(configData.scenarios);
+
+            Reporter.listen(surveyorsaurus.testRunner);
+
             var testIds = argh.argv.argv.slice(1, argh.argv.argv.length);
             if (testIds.length > 0) {
-                scenarios = scenarios.filter(function(scenario) {
+                surveyorsaurus.scenarios = surveyorsaurus.scenarios.filter((scenario) => {
                     return testIds.indexOf(scenario.id) !== -1;
                 });
             }
-            var testHistory = new TestHistory();
-            var testRunner = new TestRunner(testHistory, new ScreenshotRunner(), new ImageComparison(testHistory));
-            reporter(testRunner);
 
-            testRunner.runScenarios(scenarios, function(err, scenarioResults) {
-                if (err) throw err;
-                var testsResults = new TestResults(scenarioResults);
-
+            surveyorsaurus.run((err, testResults) => {
+                if(err) throw err;
                 if (argh.argv.approve) {
-                    approveTests(testsResults, testHistory);
+                    approveTests(testResults, surveyorsaurus.testHistory);
                 } else {
-                    exit(testsResults);
+                    exit(testResults);
                 }
             });
         });
@@ -101,15 +89,11 @@ function throwFileError(err) {
 }
 
 function approveTests(testsResults, testHistory) {
-    async.series(testsResults.failedTests.map(function(test) {
-        return function(callback) {
-            approveTest(test, testHistory, callback);
-        };
-    }), function(err, approved) {
+    async.series(testsResults.failedTests.map((test) =>
+        (callback) => approveTest(test, testHistory, callback)
+    ), (err, approved) => {
         if (err) throw err;
-        var numberApproved = approved.filter(function(approved) {
-            return approved;
-        }).length;
+        var numberApproved = approved.filter((approved) => approved).length;
         console.log("\n\t" + numberApproved + " approved");
         process.exit(0);
     });
@@ -117,15 +101,11 @@ function approveTests(testsResults, testHistory) {
 
 function approveTest(test, testHistory, callback) {
     if (argh.argv.skip) {
-        testHistory.approveTest(test, function(err) {
-            callback(err, true);
-        });
+        testHistory.approveTest(test, (err) => callback(err, true));
     } else {
-        confirm("Do you want to approve '" + test.id + "' test?", ['y', 'n'], function(yes) {
+        confirm("Do you want to approve '" + test.id + "' test?", ['y', 'n'], (yes) => {
             if (yes) {
-                testHistory.approveTest(test, function(err) {
-                    callback(err, true);
-                });
+                testHistory.approveTest(test, (err) => callback(err, true));
             } else {
                 callback(null, false);
             }

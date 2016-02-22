@@ -8,7 +8,7 @@ Simple CSS Regression Testing inspired by [csscritic](https://github.com/cburgme
 ## Usage
 
 ### Terminal
-    $ surveyorsaurus test
+    $ surveyorsaurus
 
     Commands:
      test              Run all tests
@@ -22,8 +22,15 @@ Simple CSS Regression Testing inspired by [csscritic](https://github.com/cburgme
      --skip            Skip annoying confirmation messages
      
 ### Node
-    var surveyorsaurus = require("surveyorsaurus");
-    var testRunner = new surveyorsaurus.TestRunner();
+    var Surveyorsaurus = require("surveyorsaurus");
+    
+    var surveyorsaurus = new Surveyorsaurus();
+
+    surveyorsaurus.load(configFile, function(err) {
+        surveyorsaurus.run(function(err, testResults) {
+            console.log(testResults);
+        });
+    });
     
 ## Config
 ```json
@@ -43,3 +50,7 @@ surveyorsaurus.json
   }
 }
 ```
+
+## API
+// TODO: WIP
+
