@@ -54,3 +54,9 @@ surveyorsaurus.json
 ## API
 // TODO: WIP
 
+## Roadmap
+- Web App Reporter
+- Better docs
+- test Test TESTS!!!
+
+
