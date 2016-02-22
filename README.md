@@ -17,9 +17,9 @@ Simple CSS Regression Testing inspired by [csscritic](https://github.com/cburgme
      help              Print help guide
     
     Options:
-     --config <file>   Config file path
-     --approve         Approve failed tests to past
-     --skip            Skip annoying confirmation messages
+     --config <file>   Config file path (defaults to surveyorsaurus.json)
+     --approve         Approve failing tests to pass
+     --skip            Skip annoying confirmation messages when approving failing tests
      
 ### Node
     var Surveyorsaurus = require("surveyorsaurus");
