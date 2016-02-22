@@ -12,6 +12,7 @@ var TestHistory = require('../lib/testHistory');
 var TestResults = require('../lib/testResults');
 var reporter = require('../lib/reporter');
 var config = require('../lib/config');
+var TestCaseMapper = require("../lib/mapper");
 
 switch (argh.argv.argv ? argh.argv.argv[0] : null) {
     case 'version':
@@ -69,7 +70,7 @@ function runTests() {
 
         config.validate(configJson, function(err, configData) {
             if(err) throw err;
-            var scenarios = configData.scenarios;
+            var scenarios = TestCaseMapper.mapScenarios(configData.scenarios);
             var testIds = argh.argv.argv.slice(1, argh.argv.argv.length);
             if (testIds.length > 0) {
                 scenarios = scenarios.filter(function(scenario) {
