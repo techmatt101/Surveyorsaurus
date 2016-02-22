@@ -1,13 +1,13 @@
 {
   "name": "surveyorsaurus",
-  "version": "0.2.0",
+  "version": "0.3.1",
   "description": "CSS Regression Testing",
   "main": "index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/techmatt101/Surveyorsaurus.git"
   },
-  "author": "Techmatt101",
+  "author": "techmatt101",
   "license": "MIT",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
